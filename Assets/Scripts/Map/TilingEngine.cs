@@ -6,6 +6,7 @@ using Lean;
 /**
  * Tiling Engine inspired by the following tutorial https://gamedevacademy.org/how-to-script-a-2d-tile-map-in-unity3d/
  */
+//[ExecuteInEditMode]
 public class TilingEngine : MonoBehaviour
 {
     public string tilesetSpriteName;
