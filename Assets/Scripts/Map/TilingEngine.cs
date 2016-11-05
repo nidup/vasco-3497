@@ -6,7 +6,6 @@ using Lean;
 /**
  * Tiling Engine inspired by the following tutorial https://gamedevacademy.org/how-to-script-a-2d-tile-map-in-unity3d/
  */
-//[ExecuteInEditMode]
 public class TilingEngine : MonoBehaviour
 {
     public string tilesetSpriteName;
@@ -49,8 +48,8 @@ public class TilingEngine : MonoBehaviour
         SmoothTilesGenerator smoothGenerator = new SmoothTilesGenerator();
         tiles = smoothGenerator.Generate(tiles, width, height);
 
-        //FinalTilesGenerator finalGenerator = new FinalTilesGenerator();
-        //tiles = finalGenerator.Generate(tiles, width, height);
+        FinalTilesGenerator finalGenerator = new FinalTilesGenerator();
+        tiles = finalGenerator.Generate(tiles, width, height);
 
         var index = 0;
         for (var y = 0; y < height; y++) {
