@@ -11,12 +11,6 @@ using UnityEngine;
  * @see http://fiddle.jshell.net/neuroflux/qpnf32fu/
  */
 public class BaseTilesGenerator {
-
-    private static int STATE_DEATH = 0;
-    private static int STATE_ALIVE_ONE = 1;
-    private static int STATE_ALIVE_TWO = 2;
-    private static int STATE_ALIVE_THREE = 3;
-
     /**
      * Generate new tiles and ensure that init tiles are kept to ensure smooth transitions between chunks
      */
@@ -48,10 +42,10 @@ public class BaseTilesGenerator {
             for (var y = 0; y < height; y++) {
                 if (Random.Range(1, 10) < chanceToStartAlive) {
                     baseTiles[x, y] = (Random.Range(1, 10) < 3) ?
-                        BaseTilesGenerator.STATE_ALIVE_ONE : (Random.Range(1, 10) < 5) ?
-                        BaseTilesGenerator.STATE_ALIVE_TWO : BaseTilesGenerator.STATE_ALIVE_THREE;
+                        GroundTiles.SAND_INDEX : (Random.Range(1, 10) < 5) ?
+                        GroundTiles.WATER_INDEX : GroundTiles.DEEP_WATER_INDEX;
                 } else {
-                    baseTiles[x, y] = BaseTilesGenerator.STATE_DEATH;
+                    baseTiles[x, y] = GroundTiles.FORREST_INDEX;
                 }
             }
         }
@@ -67,9 +61,9 @@ public class BaseTilesGenerator {
         for (var x = 0; x < width; x++) {
             for (var y = 0; y < height; y++) {
                 var nbs = CountAliveNeighbours(baseTiles, width, height, x, y);
-                if (baseTiles[x, y] > BaseTilesGenerator.STATE_DEATH) {
+                if (baseTiles[x, y] > GroundTiles.FORREST_INDEX) {
                     if (nbs < deathLimit) {
-                        newTiles[x, y] = BaseTilesGenerator.STATE_DEATH;
+                        newTiles[x, y] = GroundTiles.FORREST_INDEX;
                     } else {
                         newTiles[x, y] = GetDominantNeighbourActiveState(baseTiles, width, height, x, y);
                     }
@@ -77,7 +71,7 @@ public class BaseTilesGenerator {
                     if (nbs > birthLimit) {
                         newTiles[x, y] = GetDominantNeighbourActiveState(baseTiles, width, height, x, y);
                     } else {
-                        newTiles[x, y] = BaseTilesGenerator.STATE_DEATH;
+                        newTiles[x, y] = GroundTiles.FORREST_INDEX;
                     }
                 }
             }
@@ -94,7 +88,7 @@ public class BaseTilesGenerator {
                 var nbY = j + y;
                 if (nbX < 0 || nbY < 0 || nbX >= width || nbY >= height) {
                     count = count + 1;
-                } else if (baseTiles[nbX, nbY] > BaseTilesGenerator.STATE_DEATH) {
+                } else if (baseTiles[nbX, nbY] > GroundTiles.FORREST_INDEX) {
                     count = count + 1;
                 }
             }
@@ -104,9 +98,9 @@ public class BaseTilesGenerator {
     }
 
     private int GetDominantNeighbourActiveState(int[,] baseTiles, int width, int height, int x, int y) {
-        var counterAliveOne = 0;
-        var counterAliveTwo = 0;
-        var counterAliveThree = 0;
+        var counterAliveSand = 0;
+        var counterAliveWater = 0;
+        var counterAliveDeepWater = 0;
 
         for (var i = -1; i < 2; i++) {
             for (var j = -1; j < 2; j++) {
@@ -114,22 +108,22 @@ public class BaseTilesGenerator {
                 var nbY = j + y;
                 if (nbX < 0 || nbY < 0 || nbX >= width || nbY >= height) {
                     continue;
-                } else if (baseTiles[nbX, nbY] == BaseTilesGenerator.STATE_ALIVE_ONE) {
-                    counterAliveOne = counterAliveOne + 1;
-                } else if (baseTiles[nbX, nbY] == BaseTilesGenerator.STATE_ALIVE_TWO) {
-                    counterAliveTwo = counterAliveTwo + 1;
-                } else if (baseTiles[nbX, nbY] == BaseTilesGenerator.STATE_ALIVE_THREE) {
-                    counterAliveThree = counterAliveThree + 1;
+                } else if (baseTiles[nbX, nbY] == GroundTiles.SAND_INDEX) {
+                    counterAliveSand = counterAliveSand + 1;
+                } else if (baseTiles[nbX, nbY] == GroundTiles.WATER_INDEX) {
+                    counterAliveWater = counterAliveWater + 1;
+                } else if (baseTiles[nbX, nbY] == GroundTiles.DEEP_WATER_INDEX) {
+                    counterAliveDeepWater = counterAliveDeepWater + 1;
                 }
             }
         }
 
-        if (counterAliveOne > counterAliveTwo && counterAliveOne > counterAliveThree) {
-            return BaseTilesGenerator.STATE_ALIVE_ONE;
-        } else if (counterAliveTwo > counterAliveOne && counterAliveTwo > counterAliveThree) {
-            return BaseTilesGenerator.STATE_ALIVE_TWO;
+        if (counterAliveSand > counterAliveWater && counterAliveSand > counterAliveDeepWater) {
+            return GroundTiles.SAND_INDEX;
+        } else if (counterAliveWater > counterAliveSand && counterAliveWater > counterAliveDeepWater) {
+            return GroundTiles.WATER_INDEX;
         } else {
-            return BaseTilesGenerator.STATE_ALIVE_THREE;
+            return GroundTiles.DEEP_WATER_INDEX;
         }
     }
 

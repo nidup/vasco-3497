@@ -8,23 +8,27 @@ using Lean;
  */
 public class TilingEngine : MonoBehaviour
 {
-    public List<TileSprite> TileSprites;
-    public Vector2 MapSize;
-    public Sprite DefaultImage;
-    public GameObject TileContainerPrefab;
-    public GameObject TilePrefab;
-    public Vector2 CurrentPosition;
-    public Vector2 ViewPortSize;
+    public string tilesetSpriteName;
+    public Vector2 mapSize;
+    public GameObject tileContainerPrefab;
+    public GameObject tilePrefab;
+    public Vector2 currentPosition;
+    public Vector2 viewPortSize;
 
     private TileSprite[,] _map;
     private GameObject _tileContainer;
     private List<GameObject> _tiles = new List<GameObject>();
+    private Sprite[] sprites;
+
+    public void Awake()
+    {
+        sprites = Resources.LoadAll<Sprite>(tilesetSpriteName);
+    }
 
     public void Start()
     {
-        _map = new TileSprite[(int)MapSize.x, (int)MapSize.y];
+        _map = new TileSprite[(int)mapSize.x, (int)mapSize.y];
 
-        DefaultTiles();
         SetTiles();
     }
 
@@ -33,28 +37,22 @@ public class TilingEngine : MonoBehaviour
         AddTilesToWorld();
     }
 
-    private void DefaultTiles()
-    {
-        for (var y = 0; y < MapSize.y - 1; y++) {
-            for (var x = 0; x < MapSize.x - 1; x++) {
-                _map[x, y] = new TileSprite("unset", DefaultImage, Tiles.Unset);
-            }
-        }
-    }
-
     private void SetTiles()
     {
-        int width = (int) MapSize.x;
-        int height = (int) MapSize.y;
+        int width = (int) mapSize.x;
+        int height = (int) mapSize.y;
 
-        BaseTilesGenerator generator = new BaseTilesGenerator();
-        int [,] tiles = generator.Generate(width, height);
+        BaseTilesGenerator baseGenerator = new BaseTilesGenerator();
+        int [,] tiles = baseGenerator.Generate(width, height);
+
+        SmoothTilesGenerator smoothGenerator = new SmoothTilesGenerator();
+        tiles = smoothGenerator.Generate(tiles, width, height);
 
         var index = 0;
         for (var y = 0; y < height; y++) {
             for (var x = 0; x < width; x++) {
                 index = tiles[x, y];
-                _map[x, y] = new TileSprite(TileSprites[index].Name, TileSprites[index].TileImage, TileSprites[index].TileType);
+                _map[x, y] = new TileSprite(sprites[index]);
             }
         }
     }
@@ -66,41 +64,30 @@ public class TilingEngine : MonoBehaviour
         }
         _tiles.Clear();
         LeanPool.Despawn(_tileContainer);
-        _tileContainer = LeanPool.Spawn(TileContainerPrefab);
+        _tileContainer = LeanPool.Spawn(tileContainerPrefab);
         var tileSize = .64f;
-        var viewOffsetX = ViewPortSize.x/2f;
-        var viewOffsetY = ViewPortSize.y/2f;
+        var viewOffsetX = viewPortSize.x/2f;
+        var viewOffsetY = viewPortSize.y/2f;
         for (var y = -viewOffsetY; y < viewOffsetY; y++) {
             for (var x = -viewOffsetX; x < viewOffsetX; x++) {
                 var tX = x*tileSize;
                 var tY = y*tileSize;
 
-                var iX = x + CurrentPosition.x;
-                var iY = y + CurrentPosition.y;
+                var iX = x + currentPosition.x;
+                var iY = y + currentPosition.y;
 
                 if (iX < 0) continue;
                 if (iY < 0) continue;
-                if(iX > MapSize.x - 2) continue;
-                if (iY > MapSize.y - 2) continue;
+                if(iX > mapSize.x - 2) continue;
+                if (iY > mapSize.y - 2) continue;
 
-                var t = LeanPool.Spawn(TilePrefab);
+                var t = LeanPool.Spawn(tilePrefab);
                 t.transform.position = new Vector3(tX, tY, 0);
                 t.transform.SetParent(_tileContainer.transform);
                 var renderer = t.GetComponent<SpriteRenderer>();
-                renderer.sprite = _map[(int)x + (int)CurrentPosition.x, (int)y + (int)CurrentPosition.y].TileImage;
+                renderer.sprite = _map[(int)x + (int)currentPosition.x, (int)y + (int)currentPosition.y].sprite;
                 _tiles.Add(t);
             }
         }
-    }
-
-    private TileSprite FindTile(Tiles tile)
-    {
-        foreach (TileSprite tileSprite in TileSprites) {
-            if (tileSprite.TileType == tile) {
-                return tileSprite;
-            }
-        }
-
-        return null;
     }
 }
