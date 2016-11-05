@@ -3,8 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using Lean;
 
-// thx to https://gamedevacademy.org/how-to-script-a-2d-tile-map-in-unity3d/
-
+/**
+ * Tiling Engine inspired by the following tutorial https://gamedevacademy.org/how-to-script-a-2d-tile-map-in-unity3d/
+ */
 public class TilingEngine : MonoBehaviour
 {
     public List<TileSprite> TileSprites;
@@ -16,25 +17,26 @@ public class TilingEngine : MonoBehaviour
     public Vector2 ViewPortSize;
 
     private TileSprite[,] _map;
-    private GameObject controller;
     private GameObject _tileContainer;
     private List<GameObject> _tiles = new List<GameObject>();
 
     public void Start()
     {
-        controller = GameObject.Find("Controller");
         _map = new TileSprite[(int)MapSize.x, (int)MapSize.y];
 
         DefaultTiles();
         SetTiles();
     }
 
+    public void Update()
+    {
+        AddTilesToWorld();
+    }
+
     private void DefaultTiles()
     {
-        for (var y = 0; y < MapSize.y - 1; y++)
-        {
-            for (var x = 0; x < MapSize.x - 1; x++)
-            {
+        for (var y = 0; y < MapSize.y - 1; y++) {
+            for (var x = 0; x < MapSize.x - 1; x++) {
                 _map[x, y] = new TileSprite("unset", DefaultImage, Tiles.Unset);
             }
         }
@@ -42,27 +44,24 @@ public class TilingEngine : MonoBehaviour
 
     private void SetTiles()
     {
+        int width = (int) MapSize.x;
+        int height = (int) MapSize.y;
+
+        BaseTilesGenerator generator = new BaseTilesGenerator();
+        int [,] tiles = generator.Generate(width, height);
+
         var index = 0;
-        for (var y = 0; y < MapSize.y - 1; y++)
-        {
-            for (var x = 0; x < MapSize.x - 1; x++)
-            {
+        for (var y = 0; y < height; y++) {
+            for (var x = 0; x < width; x++) {
+                index = tiles[x, y];
                 _map[x, y] = new TileSprite(TileSprites[index].Name, TileSprites[index].TileImage, TileSprites[index].TileType);
-                index++;
-                if (index > TileSprites.Count - 1) index = 0;
             }
         }
     }
 
-    private void Update()
-    {
-        AddTilesToWorld();
-    }
-
     private void AddTilesToWorld()
     {
-        foreach (GameObject o in _tiles)
-        {
+        foreach (GameObject o in _tiles) {
             LeanPool.Despawn(o);
         }
         _tiles.Clear();
@@ -71,10 +70,8 @@ public class TilingEngine : MonoBehaviour
         var tileSize = .64f;
         var viewOffsetX = ViewPortSize.x/2f;
         var viewOffsetY = ViewPortSize.y/2f;
-        for (var y = -viewOffsetY; y < viewOffsetY; y++)
-        {
-            for (var x = -viewOffsetX; x < viewOffsetX; x++)
-            {
+        for (var y = -viewOffsetY; y < viewOffsetY; y++) {
+            for (var x = -viewOffsetX; x < viewOffsetX; x++) {
                 var tX = x*tileSize;
                 var tY = y*tileSize;
 
@@ -98,10 +95,12 @@ public class TilingEngine : MonoBehaviour
 
     private TileSprite FindTile(Tiles tile)
     {
-        foreach (TileSprite tileSprite in TileSprites)
-        {
-            if (tileSprite.TileType == tile) return tileSprite;
+        foreach (TileSprite tileSprite in TileSprites) {
+            if (tileSprite.TileType == tile) {
+                return tileSprite;
+            }
         }
+
         return null;
     }
 }
