@@ -24,7 +24,8 @@ public class FinalTilesGenerator {
             for (var i = 0; i < width; i++) {
                 for (var j = 0; j < height; j++) {
 
-                    // copy last tiles TODO generate one more and drop it cause we can't smooth those???
+                    // copy last tiles
+                    // TODO generate one more row and column and drop them at the end cause we can't smooth those???
                     if (i == width - 1 || j == height - 1) {
                         roundedTiles[i, j] = tiles[i, j];
                         continue;
@@ -50,40 +51,41 @@ public class FinalTilesGenerator {
                         roundedTiles[i, j] = (n - 1) * 15 + 4;
 
                     // 2 corners
-                    } else if (q == upperLayer + "," + upperLayer + "," + currentLayer + "," + currentLayer) {
+                    } else if (q == (upperLayer + "," + upperLayer + "," + currentLayer + "," + currentLayer)) {
                         roundedTiles[i, j] = (n - 1) * 15 + 11;
 
-                    } else if (q == currentLayer + "," + upperLayer + "," + currentLayer + "," + upperLayer) {
+                    } else if (q == (currentLayer + "," + upperLayer + "," + currentLayer + "," + upperLayer)) {
                         roundedTiles[i, j] = (n - 1) * 15 + 5;
 
-                    } else if (q == currentLayer + "," + currentLayer + "," + upperLayer + "," + upperLayer) {
+                    } else if (q == (currentLayer + "," + currentLayer + "," + upperLayer + "," + upperLayer)) {
                         roundedTiles[i, j] = (n - 1) * 15 + 1;
 
-                    } else if (q == upperLayer + "," + currentLayer + "," + upperLayer + "," + currentLayer) {
+                    } else if (q == (upperLayer + "," + currentLayer + "," + upperLayer + "," + currentLayer)) {
                         roundedTiles[i, j] = (n - 1) * 15 + 7;
 
-                    } else if (q == currentLayer + "," + upperLayer + "," + upperLayer + "," + currentLayer) {
+                    } else if (q == (currentLayer + "," + upperLayer + "," + upperLayer + "," + currentLayer)) {
                         roundedTiles[i, j] = (n - 1) * 15 + 14;
 
-                    } else if (q == upperLayer + "," + currentLayer + "," + currentLayer + "," + upperLayer) {
+                    } else if (q == (upperLayer + "," + currentLayer + "," + currentLayer + "," + upperLayer)) {
                         roundedTiles[i, j] = (n - 1) * 15 + 13;
 
                     // 1 corner
-                    } else if (q == upperLayer + "," + currentLayer + "," + currentLayer + "," + currentLayer) {
+                    } else if (q == (upperLayer + "," + currentLayer + "," + currentLayer + "," + currentLayer)) {
                         roundedTiles[i, j] = (n - 1) * 15 + 12;
 
-                    } else if (q == currentLayer + "," + upperLayer + "," + currentLayer + "," + currentLayer) {
+                    } else if (q == (currentLayer + "," + upperLayer + "," + currentLayer + "," + currentLayer)) {
                         roundedTiles[i, j] = (n - 1) * 15 + 10;
 
-                    } else if (q == currentLayer + "," + currentLayer + "," + currentLayer + "," + upperLayer) {
+                    } else if (q == (currentLayer + "," + currentLayer + "," + currentLayer + "," + upperLayer)) {
                         roundedTiles[i, j] = (n - 1) * 15 + 0;
 
-                    } else if (q == currentLayer + "," + currentLayer + "," + upperLayer + "," + currentLayer) {
+                    } else if (q == (currentLayer + "," + currentLayer + "," + upperLayer + "," + currentLayer)) {
                         roundedTiles[i, j] = (n - 1) * 15 + 2;
 
                     // no corner
-                    } else if (q == currentLayer + "," + currentLayer + "," + currentLayer + "," + currentLayer) {
+                    } else if (q == (currentLayer + "," + currentLayer + "," + currentLayer + "," + currentLayer)) {
                         roundedTiles[i, j] = n * 15 + 6;
+
                     }
                 }
             }

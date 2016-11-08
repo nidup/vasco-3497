@@ -34,11 +34,15 @@ public class TilingEngine : MonoBehaviour
 
     public void Update()
     {
-        AddTilesToWorld();
+        //AddTilesToWorld();
+        AddAllTilesToWorld();
     }
 
     private void SetTiles()
     {
+        // TODO Fix seed for debug purpose
+        Random.InitState (42);
+
         int width = (int) mapSize.x;
         int height = (int) mapSize.y;
 
@@ -56,6 +60,37 @@ public class TilingEngine : MonoBehaviour
             for (var x = 0; x < width; x++) {
                 index = tiles[x, y];
                 _map[x, y] = new TileSprite(sprites[index]);
+            }
+        }
+    }
+
+    private void AddAllTilesToWorld()
+    {
+        foreach (GameObject o in _tiles) {
+            LeanPool.Despawn(o);
+        }
+        _tiles.Clear();
+        LeanPool.Despawn(_tileContainer);
+        _tileContainer = LeanPool.Spawn(tileContainerPrefab);
+
+        var ratio = 3;
+        var tileWith = .24f * ratio;
+        var tileHeight = .28f * ratio;
+
+        for (var x = 0; x < mapSize.x; x++) {
+            for (var y = 0; y < mapSize.y; y++) {
+                var t = LeanPool.Spawn(tilePrefab);
+                // position
+                var tX = x * tileWith;
+                var tY = -(y * tileHeight); // TODO : reverse this?!
+                t.transform.position = new Vector3(tX, tY, 0);
+                // scale
+                t.transform.localScale = new Vector3(tileWith, tileHeight, 1f);
+
+                t.transform.SetParent(_tileContainer.transform);
+                var renderer = t.GetComponent<SpriteRenderer>();
+                renderer.sprite = _map[(int)x, (int)y].sprite;
+                _tiles.Add(t);
             }
         }
     }
