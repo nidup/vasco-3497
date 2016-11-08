@@ -29,16 +29,16 @@ public class TilingEngine : MonoBehaviour
     {
         _map = new TileSprite[(int)mapSize.x, (int)mapSize.y];
 
-        SetTiles();
+        GenerateTiles();
     }
 
     public void Update()
     {
-        //AddTilesToWorld();
-        AddAllTilesToWorld();
+        AddTilesToWorld();
+        //AddAllTilesToWorld();
     }
 
-    private void SetTiles()
+    private void GenerateTiles()
     {
         // TODO Fix seed for debug purpose
         Random.InitState (42);
@@ -64,6 +64,7 @@ public class TilingEngine : MonoBehaviour
         }
     }
 
+    // TODO debug purpose
     private void AddAllTilesToWorld()
     {
         foreach (GameObject o in _tiles) {
@@ -103,13 +104,19 @@ public class TilingEngine : MonoBehaviour
         _tiles.Clear();
         LeanPool.Despawn(_tileContainer);
         _tileContainer = LeanPool.Spawn(tileContainerPrefab);
-        var tileSize = .64f;
+
+        var ratio = 3;
+        var tileWith = .24f * ratio;
+        var tileHeight = .28f * ratio;
+
         var viewOffsetX = viewPortSize.x/2f;
         var viewOffsetY = viewPortSize.y/2f;
         for (var y = -viewOffsetY; y < viewOffsetY; y++) {
             for (var x = -viewOffsetX; x < viewOffsetX; x++) {
-                var tX = x*tileSize;
-                var tY = y*tileSize;
+
+                // position
+                var tX = x * tileWith;
+                var tY = -(y * tileHeight); // TODO : reverse this?!
 
                 var iX = x + currentPosition.x;
                 var iY = y + currentPosition.y;
@@ -120,7 +127,13 @@ public class TilingEngine : MonoBehaviour
                 if (iY > mapSize.y - 2) continue;
 
                 var t = LeanPool.Spawn(tilePrefab);
+
+                // position
                 t.transform.position = new Vector3(tX, tY, 0);
+
+                // scale
+                t.transform.localScale = new Vector3(tileWith, tileHeight, 1f);
+
                 t.transform.SetParent(_tileContainer.transform);
                 var renderer = t.GetComponent<SpriteRenderer>();
                 renderer.sprite = _map[(int)x + (int)currentPosition.x, (int)y + (int)currentPosition.y].sprite;
