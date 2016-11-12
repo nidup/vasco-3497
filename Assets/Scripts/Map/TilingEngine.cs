@@ -12,9 +12,11 @@ public class TilingEngine : MonoBehaviour
     public Vector2 mapSize;
     public GameObject tileContainerPrefab;
     public GameObject tilePrefab;
-    public Vector2 currentPosition;
+    public GameObject player;
     public Vector2 viewPortSize;
 
+    private MapChunk currentChunk;
+    private Vector2 currentPosition;
     private TileSprite[,] _map;
     private GameObject _tileContainer;
     private List<GameObject> _tiles = new List<GameObject>();
@@ -27,9 +29,91 @@ public class TilingEngine : MonoBehaviour
 
     public void Start()
     {
+        currentPosition = new Vector2(mapSize.x / 2, mapSize.y / 2);
         _map = new TileSprite[(int)mapSize.x, (int)mapSize.y];
 
-        GenerateTiles();
+        GenerateMapChunk();
+        FulfilTileMap();
+    }
+
+    public void FixedUpdate()
+    {
+        int width = (int) mapSize.x;
+        int height = (int) mapSize.y;
+        int nbToCopy = 5;
+        Rigidbody2D rb = player.GetComponent<Rigidbody2D>();
+        Vector3 localVelocity = player.transform.InverseTransformDirection(rb.velocity);
+        MapChunkGenerator generator = new MapChunkGenerator();
+
+        // Debug.Log("x : " + localVelocity.x + " y : " + localVelocity.y);
+        // Debug.Log("x/y : " + player.transform.position.x + "/" + player.transform.position.y);
+
+        float borderTop = mapSize.y / 2;
+        float borderBottom = - borderTop;
+        float borderRight = mapSize.x / 2;
+        float borderLeft = - borderRight;
+
+        if (player.transform.position.y > borderTop && localVelocity.y > 0) {
+
+            currentChunk = generator.generateTopOf(
+                currentChunk,
+                currentChunk.getPositionX(),
+                currentChunk.getPositionY() - 1,
+                width,
+                height,
+                nbToCopy
+            );
+            FulfilTileMap();
+
+            Vector2 newPosition = new Vector2(player.transform.position.x, borderBottom);
+            player.transform.position = newPosition;
+
+        } else if (player.transform.position.y < borderBottom && localVelocity.y < 0) {
+
+            currentChunk = generator.generateBottomOf(
+                currentChunk,
+                currentChunk.getPositionX(),
+                currentChunk.getPositionY() + 1,
+                width,
+                height,
+                nbToCopy
+            );
+            FulfilTileMap();
+
+            Vector2 newPosition = new Vector2(player.transform.position.x, borderTop);
+            player.transform.position = newPosition;
+
+        } else if (player.transform.position.x < borderLeft && localVelocity.x < 0) {
+
+            currentChunk = generator.generateLeftOf(
+                currentChunk,
+                currentChunk.getPositionX() - 1,
+                currentChunk.getPositionY(),
+                width,
+                height,
+                nbToCopy
+            );
+            FulfilTileMap();
+
+            Vector2 newPosition = new Vector2(borderRight, player.transform.position.y);
+            player.transform.position = newPosition;
+
+        } else if (player.transform.position.x > borderRight && localVelocity.x > 0) {
+
+            currentChunk = generator.generateRightOf(
+                currentChunk,
+                currentChunk.getPositionX() + 1,
+                currentChunk.getPositionY(),
+                width,
+                height,
+                nbToCopy
+            );
+            FulfilTileMap();
+
+            Vector2 newPosition = new Vector2(borderLeft, player.transform.position.y);
+            player.transform.position = newPosition;
+
+        }
     }
 
     public void Update()
@@ -38,33 +122,28 @@ public class TilingEngine : MonoBehaviour
         //AddAllTilesToWorld();
     }
 
-    private void GenerateTiles()
+    private void GenerateMapChunk()
     {
-        // TODO Fix seed for debug purpose
-        Random.InitState (42);
-
         int width = (int) mapSize.x;
         int height = (int) mapSize.y;
+        MapChunkGenerator generator = new MapChunkGenerator();
+        currentChunk = generator.generateInitial(width, height);
+    }
 
-        BaseTilesGenerator baseGenerator = new BaseTilesGenerator();
-        int [,] tiles = baseGenerator.Generate(width, height);
-
-        SmoothTilesGenerator smoothGenerator = new SmoothTilesGenerator();
-        tiles = smoothGenerator.Generate(tiles, width, height);
-
-        FinalTilesGenerator finalGenerator = new FinalTilesGenerator();
-        tiles = finalGenerator.Generate(tiles, width, height);
-
-        var index = 0;
+    private void FulfilTileMap()
+    {
+        int width = (int) mapSize.x;
+        int height = (int) mapSize.y;
+        int [,] tiles = currentChunk.getFinalTiles();
         for (var y = 0; y < height; y++) {
             for (var x = 0; x < width; x++) {
-                index = tiles[x, y];
-                _map[x, y] = new TileSprite(sprites[index]);
+                _map[x, y] = new TileSprite(sprites[tiles[x, y]]);
             }
         }
     }
 
     // TODO debug purpose
+    /*
     private void AddAllTilesToWorld()
     {
         foreach (GameObject o in _tiles) {
@@ -94,7 +173,7 @@ public class TilingEngine : MonoBehaviour
                 _tiles.Add(t);
             }
         }
-    }
+    }*/
 
     private void AddTilesToWorld()
     {
@@ -109,8 +188,22 @@ public class TilingEngine : MonoBehaviour
         var tileWith = .24f * ratio;
         var tileHeight = .28f * ratio;
 
+
+        //var playerPositionInTileX = (int) player.transform.position.x / tileWith;
+        //var playerPositionInTileY = (int) player.transform.position.y / tileHeight;
+        //Debug.Log("x/y : " + player.transform.position.x + "/" + player.transform.position.y);
+
+        //Vector2 currentPosition = new Vector2(player.transform.position.x, -player.transform.position.y);
+
+
         var viewOffsetX = viewPortSize.x/2f;
         var viewOffsetY = viewPortSize.y/2f;
+
+        /*
+        var viewOffsetX = (int) player.transform.position.x/2f;
+        var viewOffsetY = (int) player.transform.position.y/2f;
+        */
+
         for (var y = -viewOffsetY; y < viewOffsetY; y++) {
             for (var x = -viewOffsetX; x < viewOffsetX; x++) {
 

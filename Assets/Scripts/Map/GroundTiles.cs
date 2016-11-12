@@ -7,6 +7,7 @@ using UnityEngine;
  */
 public class GroundTiles {
 
+    public static int UNDEFINED_INDEX = -1;
     public static int FORREST_INDEX = 6;
     public static int SAND_INDEX = 6 + 15 * 1;
     public static int WATER_INDEX = 6 + 15 * 2;

@@ -14,7 +14,7 @@ public class BaseTilesGenerator {
     /**
      * Generate new tiles and ensure that init tiles are kept to ensure smooth transitions between chunks
      */
-    public int[,] Generate(int width, int height/*, int[,] initTiles = null*/) {
+    public int[,] Generate(int width, int height, int[,] initTiles = null) {
         var chanceToStartAlive = 4;
         var numberOfSteps = 2;
         var deathLimit = 3;
@@ -25,10 +25,9 @@ public class BaseTilesGenerator {
             baseTiles = DoSimulationStep(baseTiles, width, height, deathLimit, birthLimit);
         }
 
-        /* TODO
-        if (initTiles !== null) {
+        if (initTiles != null) {
             baseTiles = CopyInitTiles(baseTiles, initTiles);
-        }*/
+        }
 
         return baseTiles;
     }
@@ -128,17 +127,17 @@ public class BaseTilesGenerator {
     }
 
     /**
-     * TODO Copy init tiles to ensure smooth transition with neighbour chunk
-     *
-    private copyInitTiles(baseTiles: Array<Array<number>>, initTiles: Array<Array<number>>) {
-        for (let x = 0; x < baseTiles.length; x++) {
-            for (let y = 0; y < baseTiles[x].length; y++) {
-                if (initTiles !== null && initTiles[x][y] >= 0) {
-                    baseTiles[x][y] = initTiles[x][y];
+     * Copy init tiles to ensure smooth transition with neighbour chunk
+     */
+    private int[,] CopyInitTiles(int[,] baseTiles, int[,] initTiles) {
+        for (var x = 0; x < baseTiles.GetLength(0); x++) {
+            for (var y = 0; y < baseTiles.GetLength(1); y++) {
+                if (initTiles != null && initTiles[x, y] >= 0) {
+                    baseTiles[x, y] = initTiles[x, y];
                 }
             }
         }
 
         return baseTiles;
-    }*/
+    }
 }
